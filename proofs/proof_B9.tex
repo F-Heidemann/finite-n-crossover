@@ -1,0 +1,389 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,booktabs}
+\usepackage[colorlinks=true,allcolors=blue]{hyperref}
+
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\hypF}[2]{{}_{#1}F_{#2}}
+\newcommand{\diag}{\operatorname{diag}}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\title{Finite-$n$ crossover in reduced-rank regression\\[2pt]
+\large B9: proof of Conjecture~1 for reduced-rank regression}
+\author{Francis Headley}
+\date{7 October 2026}
+
+\begin{document}
+\maketitle
+
+\noindent Notation follows \texttt{outline.tex} and \texttt{derivations.tex}.
+Each statement carries one of the labels proved, cited, checked numerically (script in \texttt{code/}), or heuristic.
+All checks are in \texttt{code/b9\_checks.py}; its output is in \texttt{code/out/b9\_h1.txt} and \texttt{code/out/b9\_h2.txt}.
+
+\section{Setting and results}
+
+The model is $y=ABx+\varepsilon$ with $A\in\R^{N\times H}$, $B\in\R^{H\times M}$, standard Gaussian priors $\varphi$, and
+\begin{equation}
+  Z_n(C)=\int e^{-\frac n2\lVert AB-C\rVert_F^2}\varphi(A)\varphi(B)\,dA\,dB,\qquad
+  R_n(C)=\frac{Z_n(C)}{Z_n(0)},\qquad S=\tfrac n2\,CC^\top .
+\end{equation}
+Let $q=\min(N,H)$, $p=\max(N,H)$, $a=\tfrac12(p-q-1)\ge-\tfrac12$, and for $0\le j\le q$
+\begin{equation}
+  \lambda_j=\tfrac12\big[jM+(H-j)(N-j)\big],\qquad
+  \kappa_j=\lambda_{j+1}-\lambda_j=\tfrac12\big(M-N-H+2j+1\big)\quad(0\le j<q).
+  \label{eq:lamj}
+\end{equation}
+Since $\kappa_{j+1}=\kappa_j+1$, $\lambda_j$ is strictly convex and its minimum is attained at one index $j_*$ ($m=1$) or at two adjacent indices $j_0,j_0+1$ ($m=2$, $\kappa_{j_0}=0$) (proved in \texttt{derivations.tex}, Sec.~3.1).
+For $0\le j\le q$ define the stratum profile
+\begin{equation}
+  \Phi_j(S)=\E_{U}\,\E_{V}\exp\!\Big[-\tfrac n2\big\lVert(I-P_U)\,C\,(I-P_V)\big\rVert_F^2\Big],
+  \label{eq:Phi}
+\end{equation}
+with $U$ Haar on $V_j(\R^N)$ and $V$ Haar on $V_{H-j}(\R^M)$, independent, and $P_V:=I_M$ when $H-j\ge M$.
+$\Phi_j$ depends on $C$ only through the eigenvalues of $S$.
+For rank-one $C=\delta uv^\top$, $\lVert u\rVert=\lVert v\rVert=1$, we write $s=n\delta^2/2$ and $\Phi_j(s)$.
+
+The results are as follows.
+\begin{enumerate}
+\item Theorem~\ref{thm:main} (proved, $m=1$, every rank of $C$, all $N,H,M$): $\lvert\log R_n(C)-\log\Phi_{j_*}(S)\rvert\le C_0\big(\lVert C\rVert_F^{2\gamma}+n^{-\gamma/2}\big)$ for $\lVert C\rVert_F\le c_0$, $n\ge n_0$, with $\gamma>0$ given in Eq.~\eqref{eq:gamma}. The upper bound $\log R_n\le\log\Phi_{j_*}+C_0n^{-\gamma}$ holds for every $C$.
+\item Remark~\ref{rem:fixed} (proved for $(N,H,M)=(2,1,1)$, checked numerically for two other cases): at fixed $\delta>0$ the error does not vanish as $n\to\infty$. For $(2,1,1)$ it tends to $-\delta$.
+\item Corollary~\ref{cor:exponents} (proved): for rank-one $C$, $\log\Phi_{j_*}(s)=-[\lambda(1)-\lambda(0)]\log s+[m(1)-1]\log\log s+O(1)$, with $\lambda(1)$ and $m(1)$ obtained independently of Ref.~\cite{AW05} and equal to the values of \texttt{dln.lam} in all $8000$ cases $N,H,M\le20$ (checked numerically).
+\item Theorem~\ref{thm:tie} (proved, $m=2$, rank-one $C$): $R_n=\Phi_{j_0+1}(s)\,[\log\tfrac n{1+s}+O(1)]/[\log n+O(1)]$ uniformly in $0\le s\le n/2$.
+\end{enumerate}
+
+\subsection{Corrections to Conjecture~1}\label{sec:corrections}
+
+Conjecture~1 states $\log R_n=\log\Phi_{j_*}(s)+o(1)$ as $n\to\infty$ uniformly in $\delta\ge0$.
+The results above change it in four places.
+\begin{enumerate}
+\item The error is $o(1)$ in the joint limit $n\to\infty$, $\delta\to0$, with the rate of Theorem~\ref{thm:main}. At fixed $\delta$ it converges to a nonzero function of $\delta$ (Remark~\ref{rem:fixed}). This is consistent with outline Sec.~1, where $c_\beta=(\lambda_1-\lambda_0)\log\delta^2+O(1)$; the $O(1)$ depends on $\delta$.
+\item For $m=2$ the profile carries the factor $\log(n/(1+s))/\log n$. The error is $O(1/\log n)$ only for $s=n^{o(1)}$. At $s=n^\theta$, $0<\theta<1$, $\log R_n-\log\Phi\to\log(1-\theta)$, and at fixed $\delta$ the difference diverges as $-\log\log n$. This is the change of the power of $\log n$ between $S=0$ and fixed $C$ left open in \texttt{results\_phase1\_2.md}, Sec.~6.
+\item The large-$s$ form of $\log\Phi_{j_*}$ contains $+\log\log s$ when the rank-one multiplicity is $m(1)=2$.
+\item The restriction $H-j_*\le M$ is not needed. If $j_*<q$ then $M-H+j_*\ge N-j_*\ge1$; if $j_*=q=N$ then $\Phi_{j_*}\equiv1$ (Lemma~\ref{lem:stratum}).
+\end{enumerate}
+
+\section{Exact representation}
+
+\begin{lemma}[proved]\label{lem:rep}
+Let $W_r=\{y\in\R^r:y_1\ge\dots\ge y_r\ge0\}$, and for $y\in W_q$ let
+\begin{equation}
+  G_n(y)=\prod_{i=1}^q y_i^{a}(1+y_i)^{-M/2}e^{-y_i/(2n)}\prod_{i<l}(y_i-y_l),\qquad
+  E(y)=\diag\big((1+y_1)^{-1},\dots,(1+y_q)^{-1},1,\dots,1\big)\in\R^{N\times N},
+\end{equation}
+and $h_S(y)=\E_O\exp[-\tr(S\,O\,E(y)\,O^\top)]$ with $O$ Haar on $O(N)$.
+Then
+\begin{equation}
+  R_n(C)=\frac{\int_{W_q}G_n(y)\,h_S(y)\,dy}{\int_{W_q}G_n(y)\,dy}.
+  \label{eq:Rn}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+The $B$-integral factorises over columns. With $Q=I_H+nA^\top A$ and the push-through identity $I_N-nAQ^{-1}A^\top=(I_N+nAA^\top)^{-1}$ it gives $\det(I_H+nA^\top A)^{-M/2}\exp[-\tr S(I_N+nAA^\top)^{-1}]$ (\texttt{derivations.tex}, Sec.~1.1).
+For Gaussian $A$, $AA^\top=O\diag(\ell_1,\dots,\ell_q,0,\dots,0)O^\top$ with $O$ Haar on $O(N)$, independent of $\ell\in W_q$, and $\ell$ has density proportional to $\prod_i\ell_i^{a}e^{-\ell_i/2}\prod_{i<l}(\ell_i-\ell_l)$ (cited: Ref.~\cite{Mui82}, Thms.~3.2.17--3.2.18).
+Then $\det(I_H+nA^\top A)=\prod_i(1+n\ell_i)$ and $(I_N+nAA^\top)^{-1}=O\,E(n\ell)\,O^\top$.
+The substitution $y=n\ell$ multiplies the density by a constant depending on $n$ only, which cancels in the ratio.
+\end{proof}
+
+We use two facts.
+(M) For $S\succeq0$ and diagonal $0\le D\le D'$, $\tr(SODO^\top)\le\tr(SOD'O^\top)$, and $\tr(SOD O^\top)\le\lVert D\rVert_\infty\tr S$.
+(W) If $f(\alpha)$, $\alpha\in\R^{p'\times r'}$, depends only on the nonzero eigenvalues $y\in W_{r}$ of $\alpha^\top\alpha$, $r=\min(p',r')$, then $\int f\,d\alpha=c\int_{W_r}f\,\prod_ly_l^{(\lvert p'-r'\rvert-1)/2}\prod_{l<l'}(y_l-y_{l'})\,dy$, and under any probability density of this form the left singular frame of $\alpha$ is Haar and independent of $y$ (cited: Ref.~\cite{Mui82}, Sec.~3.2, by reweighting the Gaussian case).
+
+\section{Stratum integrals}
+
+For $0\le j\le q$ and $r=q-j$ define on $W_r$
+\begin{equation}
+  g^{(j)}(y)=\prod_{l=1}^r y_l^{a}(1+y_l)^{-M/2}\prod_{l<l'}(y_l-y_{l'}),\qquad
+  h^{(j)}_S(y)=\E_O\exp\!\big[-\tr\big(S\,O\,E^{(j)}(y)\,O^\top\big)\big],
+  \label{eq:gj}
+\end{equation}
+with $E^{(j)}(y)=\diag(0_j,(1+y_1)^{-1},\dots,(1+y_r)^{-1},1_{N-q})$, and $Z^{(j)}=\int_{W_r}g^{(j)}$; for $j=q$, $W_0$ is a point and $g^{(q)}=Z^{(q)}=1$.
+For $1\le j\le q$ define on $W_j$
+\begin{equation}
+  F^{(j)}(z)=\prod_{i=1}^j z_i^{a-M/2+q-j}e^{-z_i/2}\prod_{i<i'}(z_i-z_{i'}),\qquad J^{(j)}=\int_{W_j}F^{(j)},\qquad J^{(0)}=1.
+  \label{eq:Fj}
+\end{equation}
+In both cases $a-M/2+q-j=-\kappa_j$ (direct substitution of $a$ and $q$, for $N\ge H$ and for $N<H$).
+
+\begin{lemma}[proved]\label{lem:integrable}
+(a) If $j<q$ and $\kappa_j>0$, then $Z^{(j)}<\infty$.
+(b) If $j\ge1$ and $\kappa_{j-1}<0$, then $J^{(j)}<\infty$, and $\int_{W_j,\,z_j<\theta}F^{(j)}\le c_j\,\theta^{-\kappa_{j-1}}$ for $0<\theta\le1$.
+\end{lemma}
+
+\begin{proof}
+On $W$, $y_l-y_{l'}\le y_l$ for $l<l'$.
+(a) $g^{(j)}\le\prod_ly_l^{a+r-l}(1+y_l)^{-M/2}$.
+Each factor is integrable on $(0,\infty)$: at $0$ because $a+r-l\ge a>-1$, at $\infty$ because $a+r-l-M/2\le-\kappa_j-1<-1$.
+(b) $F^{(j)}\le\prod_iz_i^{-\kappa_j+j-i}e^{-z_i/2}$.
+The worst factor is $i=j$; since $\kappa_j=\kappa_{j-1}+1$, its exponent $-\kappa_j=-\kappa_{j-1}-1$ exceeds $-1$, and its integral over $(0,\theta)$ is $\theta^{-\kappa_{j-1}}/(-\kappa_{j-1})$.
+The factors $i<j$ have exponents larger by at least one.
+\end{proof}
+
+\begin{lemma}[proved]\label{lem:stratum}
+Let $j=q$, or $j<q$ with $\kappa_j>0$.
+Then $\int_{W_{q-j}}g^{(j)}h^{(j)}_S\,dy=Z^{(j)}\,\Phi_j(S)$ for every $S$.
+For $C=\delta uv^\top$, $\Phi_j(s)=\E\,e^{-s\tau_U\tau_V}$ with independent $\tau_U\sim\mathrm{Beta}(\tfrac{N-j}2,\tfrac j2)$, $\tau_V\sim\mathrm{Beta}(\tfrac{M-H+j}2,\tfrac{H-j}2)$, where $\mathrm{Beta}(c,0)=\delta_1$ and $\mathrm{Beta}(0,c)=\delta_0$, and
+\begin{equation}
+  \Phi_j(s)=\hypF22\big(\tfrac{N-j}2,\tfrac{M-H+j}2;\tfrac N2,\tfrac M2;-s\big).
+  \label{eq:2F2}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Case $j=q$.
+$\tr(SOE^{(q)}O^\top)=\tfrac n2\lVert(I-P_U)C\rVert_F^2$ with $U$ the first $q$ columns of $O$.
+If $q=N$ this vanishes and $\Phi_N\equiv1$; if $q=H<N$ the $V$-average in Eq.~\eqref{eq:Phi} is over $V_0$ and $I-P_V=I_M$.
+
+Case $j<q$.
+Let $p'=N-j$, $r'=H-j$, so $\min(p',r')=q-j$ and $\lvert p'-r'\rvert=\lvert N-H\rvert$.
+From $\kappa_j>0$ and $j<q\le N$, $M-r'=M-H+j\ge N-j\ge1$.
+For $\alpha\in\R^{p'\times r'}$, $\beta\in\R^{r'\times M}$, $\Gamma\in\R^{p'\times M}$ consider $I(\Gamma)=\iint e^{-\frac12\lVert\beta\rVert^2-\frac12\lVert\alpha\beta-\Gamma\rVert^2}d\alpha\,d\beta$.
+Integrating $\beta$ first (columnwise Gaussian, as in Lemma~\ref{lem:rep}) gives
+$(2\pi)^{r'M/2}\int\det(I+\alpha^\top\alpha)^{-M/2}e^{-\frac12\tr\Gamma^\top(I+\alpha\alpha^\top)^{-1}\Gamma}d\alpha$.
+Integrating $\alpha$ first (rowwise least squares; $\beta$ has rank $r'\le M$ almost everywhere) gives
+$(2\pi)^{p'r'/2}\int e^{-\frac12\lVert\beta\rVert^2}\det(\beta\beta^\top)^{-p'/2}e^{-\frac12\lVert\Gamma(I-P_\beta)\rVert^2}d\beta$, with $P_\beta$ the projector on the row space of $\beta$.
+By (W) and Lemma~\ref{lem:integrable}(a), $I(0)=c\,Z^{(j)}<\infty$, so by Tonelli both forms are finite and equal for every $\Gamma$.
+Dividing by $I(0)$,
+\begin{equation}
+  \E_\alpha\,e^{-\frac12\tr\Gamma^\top(I+\alpha\alpha^\top)^{-1}\Gamma}=\E_\beta\,e^{-\frac12\lVert\Gamma(I-P_\beta)\rVert^2},
+  \label{eq:alphabeta}
+\end{equation}
+where $\alpha$ has density $\propto\det(I+\alpha^\top\alpha)^{-M/2}$ and $\beta$ has density $\propto e^{-\lVert\beta\rVert^2/2}\det(\beta\beta^\top)^{-p'/2}$.
+Write $\beta=(\beta\beta^\top)^{1/2}Q$; for Gaussian $\beta$ the row frame $Q$ is Haar and independent of $\beta\beta^\top$, and the reweighting depends on $\beta\beta^\top$ only, so $I-P_\beta=I-P_V$ with $V=Q^\top$ Haar on $V_{r'}(\R^M)$.
+
+Now take $\hat O$ Haar on $V_{p'}(\R^N)$, independent, and $\Gamma=\sqrt n\,\hat O^\top C$.
+The right side of Eq.~\eqref{eq:alphabeta} becomes $\E\exp[-\tfrac n2\lVert(I-P_U)C(I-P_V)\rVert^2]=\Phi_j(S)$, with $U$ the Haar $j$-frame complementary to $\hat O$.
+On the left side, (W) gives $(I+\alpha\alpha^\top)^{-1}=Q_\alpha\diag((1+y_l)^{-1},1_{p'-q+j})Q_\alpha^\top$ with $Q_\alpha$ Haar on $O(p')$, independent of $y\sim g^{(j)}/Z^{(j)}$.
+The frame $\hat OQ_\alpha$ is Haar and independent of $y$; completing it to $O\in O(N)$ gives $\tfrac12\tr\Gamma^\top(\cdot)\Gamma=\tr(SOE^{(j)}(y)O^\top)$, so the left side equals $\int g^{(j)}h^{(j)}_S/Z^{(j)}$.
+
+Rank one: $\tfrac n2\lVert(I-P_U)C(I-P_V)\rVert^2=s\,\lvert(I-P_U)u\rvert^2\lvert(I-P_V)v\rvert^2$, and $\lvert(I-P_U)u\rvert^2$ is the squared norm of $N-j$ coordinates of a uniform point on $S^{N-1}$, hence $\mathrm{Beta}(\tfrac{N-j}2,\tfrac j2)$; likewise for $V$.
+Expanding $e^{-s\tau_U\tau_V}$ and using $\E\tau^m=(c)_m/(c+d)_m$ for $\tau\sim\mathrm{Beta}(c,d)$ gives Eq.~\eqref{eq:2F2}; the series converges absolutely.
+\end{proof}
+
+\begin{lemma}[proved]\label{lem:compare}
+Suppose $\kappa_i>0$ for $j\le i<q$.
+For $Y>0$ and all $S\succeq0$,
+\begin{equation}
+  T^{(j)}(Y,S):=\frac1{Z^{(j)}}\int_{W_{q-j},\,y_1>Y}g^{(j)}h^{(j)}_S\le\frac{Z^{(j+1)}}{\kappa_jZ^{(j)}}\,Y^{-\kappa_j}\,\Phi_{j+1}(S),
+  \label{eq:tail}
+\end{equation}
+and there are constants $A_j$ with
+\begin{equation}
+  \Phi_{j+1}(S)\le A_j\,(1+\tr S)^{\kappa_j}\,\Phi_j(S)\qquad\text{for all }S\succeq0.
+  \label{eq:compare}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Write $y=(y_1,y'')$ with $y''\in W_{q-j-1}$; then $g^{(j)}(y)=y_1^a(1+y_1)^{-M/2}\prod_{l\ge2}(y_1-y_l)\,g^{(j+1)}(y'')$, and $E^{(j)}(y)=E^{(j+1)}(y'')+(1+y_1)^{-1}e_{j+1}e_{j+1}^\top$.
+
+Eq.~\eqref{eq:tail}: by (M), $h^{(j)}_S(y)\le h^{(j+1)}_S(y'')$; also $\prod_{l\ge2}(y_1-y_l)\le y_1^{q-j-1}$.
+Dropping the constraint $y''_1\le y_1$ and using $\int_Y^\infty y^{a+q-j-1}(1+y)^{-M/2}dy\le\int_Y^\infty y^{-\kappa_j-1}dy=Y^{-\kappa_j}/\kappa_j$ gives Eq.~\eqref{eq:tail} by Lemma~\ref{lem:stratum} at $j+1$.
+
+Eq.~\eqref{eq:compare}, by downward induction on $j$.
+Let $t=\tr S$, $Y=K(1+t)$ with $K\ge1$ to be fixed, and restrict the integral defining $Z^{(j)}\Phi_j(S)$ to $\{y_1\ge2Y,\ y''_1\le Y\}$.
+There, $\prod_{l\ge2}(y_1-y_l)\ge(y_1/2)^{q-j-1}$ and, by (M), $h^{(j)}_S(y)\ge e^{-t/(1+y_1)}h^{(j+1)}_S(y'')\ge e^{-1/2}h^{(j+1)}_S(y'')$.
+With $1+y\le2y$ for $y\ge1$, $\int_{2Y}^\infty y^a(1+y)^{-M/2}(y/2)^{q-j-1}dy\ge b_j\,Y^{-\kappa_j}$, $b_j>0$.
+Hence
+\begin{equation}
+  Z^{(j)}\Phi_j(S)\ge e^{-1/2}b_jK^{-\kappa_j}(1+t)^{-\kappa_j}Z^{(j+1)}\big[\Phi_{j+1}(S)-T^{(j+1)}(Y,S)\big].
+\end{equation}
+If $j+1=q$, $T^{(q)}\equiv0$.
+Otherwise Eq.~\eqref{eq:tail} at $j+1$ and the induction hypothesis Eq.~\eqref{eq:compare} at $j+1$ give $T^{(j+1)}(Y,S)\le c\,A_{j+1}K^{-\kappa_{j+1}}\Phi_{j+1}(S)$, which is at most $\tfrac12\Phi_{j+1}(S)$ for $K$ large.
+This proves Eq.~\eqref{eq:compare} at $j$.
+\end{proof}
+
+\section{Main theorem: unique dominant stratum}
+
+\begin{theorem}[proved]\label{thm:main}
+Let $\lambda_j$ have a unique minimiser $j_*=:k$, and let
+\begin{equation}
+  \gamma=\tfrac13\min\{1,\ \kappa_k\ (\text{if }k<q),\ -\kappa_{k-1}\ (\text{if }k\ge1)\}>0.
+  \label{eq:gamma}
+\end{equation}
+There are $C_0,c_0,n_0$, depending on $N,H,M$ only, such that
+\begin{align}
+  \log R_n(C)&\le\log\Phi_k(S)+C_0\,n^{-\gamma}\qquad\text{for all }n\ge n_0\text{ and all }C,\label{eq:upper}\\
+  \big\lvert\log R_n(C)-\log\Phi_k(S)\big\rvert&\le C_0\big(\lVert C\rVert_F^{2\gamma}+n^{-\gamma/2}\big)\qquad\text{for }n\ge n_0,\ \lVert C\rVert_F\le c_0 .\label{eq:twosided}
+\end{align}
+In particular $\lim_{\delta_0\to0}\limsup_{n\to\infty}\sup_{\lVert C\rVert_F\le\delta_0}\lvert\log R_n(C)-\log\Phi_k(S)\rvert=0$, which covers $s\to0$, $s=O(1)$ and $s\to\infty$ with $s\le\delta_0^2n/2$.
+\end{theorem}
+
+\begin{proof}
+Write $r=q-k$ and $y=(y_{\rm top},y_{\rm bot})\in W_k\times W_r$ with $y_{{\rm top},k}\ge y_{{\rm bot},1}$.
+By Lemma~\ref{lem:integrable}, $J:=J^{(k)}<\infty$ and $Z:=Z^{(k)}<\infty$.
+
+Factorisation.
+$G_n(y)=G^{\rm top}(y_{\rm top})\prod_{i\le k<l}(y_i-y_l)\,g^{(k)}(y_{\rm bot})e^{-\lvert y_{\rm bot}\rvert/(2n)}$.
+Substituting $y_{\rm top}=nz$,
+\begin{equation}
+  \int G^{\rm top}\prod_{i\le k<l}(y_i-y_l)\,dy_{\rm top}=n^{e}\int_{W_k,\ z_k\ge y_{{\rm bot},1}/n}F^{(k)}(z)\,\rho_n(z,y_{\rm bot})\,dz,
+  \label{eq:top}
+\end{equation}
+with $e=k(1-\kappa_k)+k(k-1)/2$ and $\rho_n=\prod_{i\le k}(1+1/(nz_i))^{-M/2}\prod_{i\le k<l}(1-y_l/(nz_i))\in[0,1]$.
+
+Sandwich.
+By (M) and the ordering $(1+y_1)^{-1}\le\dots\le(1+y_k)^{-1}$,
+\begin{equation}
+  e^{-\tr S/(1+y_k)}\,h^{(k)}_S(y_{\rm bot})\le h_S(y)\le h^{(k)}_S(y_{\rm bot}).
+  \label{eq:sandwich}
+\end{equation}
+
+Upper bound.
+By Eqs.~\eqref{eq:sandwich}, \eqref{eq:top} with $\rho_n\le1$, and Lemma~\ref{lem:stratum}, $\int G_nh_S\le n^eJZ\,\Phi_k(S)$.
+For the denominator restrict to $z_k\ge\theta$, $y_{{\rm bot},1}\le\varepsilon'n$ with $\varepsilon'\le\theta^2\le1$.
+There $\rho_n\ge(1+1/(n\theta))^{-kM/2}(1-\theta)^{kr}$ and $e^{-\lvert y_{\rm bot}\rvert/(2n)}\ge e^{-r\varepsilon'/2}$, so by Lemma~\ref{lem:integrable}(b) and Eq.~\eqref{eq:tail} at $S=0$,
+\begin{equation}
+  \int G_n\ge n^eJZ\,\big[1-c_k\theta^{-\kappa_{k-1}}/J\big]\big[1-c\,(\varepsilon'n)^{-\kappa_k}\big](1+1/(n\theta))^{-kM/2}(1-\theta)^{kr}e^{-r\varepsilon'/2}.
+  \label{eq:den}
+\end{equation}
+The choice $\theta=n^{-1/3}$, $\varepsilon'=n^{-2/3}$ makes the deviations from one $O(n^{\kappa_{k-1}/3})$, $O(n^{-\kappa_k/3})$, $O(n^{-2/3})$, $O(n^{-1/3})$ and $O(n^{-2/3})$, all $O(n^{-\gamma})$, which gives Eq.~\eqref{eq:upper}.
+(Factors referring to the top block are absent if $k=0$, and factors referring to the bottom block are absent if $k=q$.)
+
+Lower bound.
+Let $\varepsilon=\max(\lVert C\rVert_F^2/2,n^{-1/2})$, so $\tr S\le\varepsilon n$ and $\varepsilon n\ge1$, and set $\theta=\varepsilon^{1/3}$, $\varepsilon'=\varepsilon^{2/3}$.
+On $\{z_k\ge\theta,\ y_{{\rm bot},1}\le\varepsilon'n\}$, $\tr S/(1+y_k)\le\varepsilon/\theta=\varepsilon^{2/3}$, and the bounds on $\rho_n$ and $e^{-\lvert y_{\rm bot}\rvert/(2n)}$ used in Eq.~\eqref{eq:den} hold.
+Therefore
+\begin{equation}
+  \int G_nh_S\ge n^e\big(J-c_k\theta^{-\kappa_{k-1}}\big)\,e^{-\varepsilon^{2/3}}(1+1/(n\theta))^{-kM/2}(1-\theta)^{kr}e^{-r\varepsilon'/2}\int_{y_1\le\varepsilon'n}g^{(k)}h^{(k)}_S .
+\end{equation}
+The last integral is $Z[\Phi_k(S)-T^{(k)}(\varepsilon'n,S)]$, and Eqs.~\eqref{eq:tail}--\eqref{eq:compare} give
+\begin{equation}
+  T^{(k)}(\varepsilon'n,S)\le c\,A_k\Big(\frac{1+\varepsilon n}{\varepsilon'n}\Big)^{\kappa_k}\Phi_k(S)\le c'\varepsilon^{\kappa_k/3}\,\Phi_k(S).
+\end{equation}
+The relative errors are $\varepsilon^{2/3}$, $\theta^{-\kappa_{k-1}}=\varepsilon^{-\kappa_{k-1}/3}$, $1/(n\theta)\le n^{-5/6}$, $\theta=\varepsilon^{1/3}$, $\varepsilon'$ and $\varepsilon^{\kappa_k/3}$, all $O(\varepsilon^{\gamma}+n^{-5/6})$.
+Combining with $\int G_n\le n^eJZ$ gives $\log R_n\ge\log\Phi_k(S)-C(\varepsilon^\gamma+n^{-5/6})$, and $\varepsilon^\gamma\le(\lVert C\rVert_F^2/2)^\gamma+n^{-\gamma/2}$.
+The constants $c_0,n_0$ ensure that every bracket exceeds $\tfrac12$, so that logarithms of brackets are bounded by twice their deviation from one.
+\end{proof}
+
+\begin{remark}\label{rem:fixed}
+The error in Eq.~\eqref{eq:twosided} does not vanish at fixed $C\ne0$.
+For $(N,H,M)=(2,1,1)$ ($k=q=1$, $\Phi_1(s)=\hypF11(\tfrac12;1;-s)$), $\lim_{n\to\infty}[\log R_n-\log\Phi_1(n\delta^2/2)]=-\delta$ for every fixed $\delta>0$ (proved).
+In Eq.~\eqref{eq:Rn}, $G_n(y)=(1+y)^{-1/2}e^{-y/(2n)}$ and $h_s(y)=e^{-s/(1+y)}\hypF11(\tfrac12;1;-sy/(1+y))$.
+With $y=nz$, $s/(1+y)\to\delta^2/(2z)$, the ratio $\hypF11(\tfrac12;1;-sy/(1+y))/\hypF11(\tfrac12;1;-s)\to1$ and is bounded on $y\ge1$ by monotonicity of $\hypF11(\tfrac12;1;-x)=e^{-x/2}I_0(x/2)$, and the region $y<1$ contributes $O(e^{-s/2}n^{-1/2}/\Phi_1(s))\to0$.
+Dominated convergence gives the limit $\int_0^\infty z^{-1/2}e^{-z/2-\delta^2/(2z)}dz/\sqrt{2\pi}=e^{-\delta}$.
+The value $-\delta$ is reproduced to $10^{-5}$ at $n\ge10^{12}$ for $\delta=0.01$--$1$ (checked numerically, \texttt{b9\_checks.py h1}).
+For $(N,H,M)=(3,1,2)$ and $(2,1,3)$ the supremum over $s\le\varepsilon n$ of the error equals $0.447$, $0.0447$, $0.00447$ at $\varepsilon=10^{-1},10^{-3},10^{-5}$, i.e.\ $\sqrt{2\varepsilon}=\delta$, independently of $n\in[10^{10},10^{18}]$ (checked numerically).
+For $(3,2,3)$, $k=1$, the error at $s/n=10^{-2},10^{-4},10^{-8}$ is $-0.18$, $-0.025$, $-5\times10^{-4}$ at $n=10^{12}$ (checked numerically with \texttt{rrr.py}, whose contour rule limits the check to $s\le10^{10}$).
+On the fibre $\{ab=C\}$, $\tfrac12\lvert a\rvert^2+\tfrac12b^2\ge\delta$, so $e^{-\delta}$ is the largest prior weight there; $\Phi_k$ uses the prior at the origin (heuristic interpretation).
+\end{remark}
+
+\section{Large-$s$ behaviour and learning coefficients}
+
+\begin{lemma}[proved]\label{lem:beta}
+Let $\tau_1\sim\mathrm{Beta}(c_1,d_1)$, $\tau_2\sim\mathrm{Beta}(c_2,d_2)$ be independent with $c_i,d_i>0$, $T=\tau_1\tau_2$, $\nu=\min(c_1,c_2)$ and $\epsilon=1$ if $c_1=c_2$, $\epsilon=0$ otherwise.
+Then $P(T\le x)\asymp x^\nu(1+\log\tfrac1x)^\epsilon$ for $0<x\le1$, and $\E e^{-sT}\asymp s^{-\nu}(1+\log s)^\epsilon$ for $s\ge1$.
+If $\tau_2\equiv1$ the same holds with $\nu=c_1$, $\epsilon=0$.
+\end{lemma}
+
+\begin{proof}
+$P(\tau_1\le y)\asymp\min(1,y)^{c_1}$, so $P(T\le x)\asymp P(\tau_2\le x)+x^{c_1}\E[\tau_2^{-c_1};\tau_2>x]$, and $\E[\tau_2^{-c_1};\tau_2>x]\asymp\int_x^1t^{c_2-c_1-1}dt$.
+For the Laplace transform, $\E e^{-sT}=\int_0^\infty e^{-v}P(T\le v/s)\,dv$; the lower bound is $e^{-1}P(T\le1/s)$, and the upper bound follows from $P(T\le v/s)\le C(1+v)^{\nu+1}P(T\le1/s)$.
+\end{proof}
+
+\begin{corollary}[proved]\label{cor:exponents}
+Let $m=1$, $k=j_*$, $C=\delta uv^\top$.
+Define $\nu_k$ and $\epsilon_k$ by Lemma~\ref{lem:beta} applied to the nondegenerate factors among $\tau_U,\tau_V$ of Lemma~\ref{lem:stratum} ($\nu_k=0$ if $k=N$).
+Then:
+\begin{enumerate}
+\item $Z_n(0)=c\,n^{-\lambda_k}(1+O(n^{-\gamma}))$, so $\lambda(0)=\lambda_k$ with multiplicity one.
+\item For fixed $\delta\le c_0$, $\log Z_n(C)=-(\lambda_k+\nu_k)\log n+\epsilon_k\log\log n+O(1)$, so $\lambda(1)=\lambda_k+\nu_k$ and $m(1)=1+\epsilon_k$.
+\item $\log\Phi_k(s)=-[\lambda(1)-\lambda(0)]\log s+[m(1)-1]\log\log s+O(1)$ as $s\to\infty$.
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+(1) By Lemma~\ref{lem:rep}, $Z_n(0)=c\,n^{-q(a+1)-q(q-1)/2}\int G_n$, and the proof of Theorem~\ref{thm:main} gives $\int G_n=n^eJZ(1+O(n^{-\gamma}))$.
+With $q=k+r$ and $2a+1=\lvert N-H\rvert$ the total exponent is $-\tfrac12[kM+r(r+\lvert N-H\rvert)]=-\lambda_k$.
+(2) Eq.~\eqref{eq:twosided} bounds $\log R_n-\log\Phi_k(n\delta^2/2)$ uniformly in $n\ge n_0$; insert Lemma~\ref{lem:beta}.
+This determines the learning coefficient and multiplicity of every rank-one $C$ with $\lVert C\rVert_F\le c_0$; Ref.~\cite{AW05} states that they depend on the rank of $C$ only (cited).
+(3) is Lemma~\ref{lem:beta} restated with (1) and (2).
+\end{proof}
+
+The exponents can be written without case distinctions.
+With $g_j:=\lambda_j+\tfrac12(N-j)$ one has $\lambda_j+\tfrac12(M-H+j)=g_{j+1}$, so $\lambda(1)=\min(g_k,g_{k+1})$ over the nondegenerate channels, and $g$ is convex with its minimum at $k$ or $k+1$ (proved: $g_{k+2}-g_{k+1}=\kappa_k+\tfrac12>0$ and $g_k-g_{k-1}=\kappa_{k-1}-\tfrac12<0$).
+Corollary~\ref{cor:exponents} gives $\lambda(0)$ and $\lambda(1)$ independently of Ref.~\cite{AW05}.
+For $N,H,M\le20$ ($8000$ triples) the values agree with \texttt{dln.lam} in exact arithmetic, and $m(1)=2$ holds exactly when $N+H+M+1$ is odd and the strict triangle inequalities $M+1<N+H$, $N+1<M+H$, $H+1<M+N$ hold (checked numerically, \texttt{b9\_checks.py algebra}; this includes the $m=2$ triples, treated with Theorem~\ref{thm:tie}).
+
+For truths of rank $\rho\ge2$, Theorem~\ref{thm:main} combined with Watanabe's asymptotics $\log Z_n(C)=-\lambda(C)\log n+O(\log\log n)$ at fixed $C$ (cited: Ref.~\cite{Wat09}) and with $\lambda(C)=\lambda(\rho)$ from Ref.~\cite{AW05} gives $\log\Phi_{j_*}(tS_0)=-[\lambda(\rho)-\lambda(0)]\log t+O(\log\log t)$ as $t\to\infty$ for every $S_0$ of rank $\rho$ (proved, given the cited results).
+This replaces the codimension count of \texttt{derivations.tex}, Eq.~(17), which remains heuristic as a direct statement about $\Phi_{j}$.
+
+\section{Two dominant strata}
+
+\begin{theorem}[proved]\label{thm:tie}
+Let $\lambda_{j_0}=\lambda_{j_0+1}$ ($m=2$) and $C=\delta uv^\top$, $s=n\delta^2/2$, $\Phi:=\Phi_{j_0+1}$.
+By Eq.~\eqref{eq:2F2}, $\Phi_{j_0}$ and $\Phi_{j_0+1}$ coincide as $\hypF22$ functions because the tie condition $M-H+j_0+1=N-j_0$ exchanges the two parameter pairs.
+There is $C_0$ such that for $n\ge3$ and $0\le s\le n/2$, with $\ell=\log\frac n{1+s}$,
+\begin{equation}
+  R_n(s)=\Phi(s)\,\frac{\ell+\xi_1}{\log n+\xi_0},\qquad\lvert\xi_0\rvert,\lvert\xi_1\rvert\le C_0 .
+  \label{eq:tie}
+\end{equation}
+Consequently $\log R_n(s)-\log\Phi(s)-\log(\ell/\log n)=O(1/\ell)$ for $\ell\ge2C_0$, which tends to zero uniformly as $n\to\infty$ and $\delta\to0$, since $\ell\ge\min\{\log(n/2),\log(1/\delta^2)\}$.
+\end{theorem}
+
+\begin{proof}
+Let $k=j_0$ and $r''=q-k-1$.
+Then $\kappa_k=0$, $\kappa_{k-1}=-1$ and $\kappa_{k+i}=i$, so $J:=J^{(k)}<\infty$, $Z:=Z^{(k+1)}<\infty$, Lemma~\ref{lem:compare} applies for $j\ge k+1$, and Lemma~\ref{lem:integrable}(b) gives $J-J_\theta\le c\,\theta$.
+Write $y=(y_{\rm top},Y,y_{\rm bot})\in W_k\times\R_+\times W_{r''}$, $Y=y_{k+1}$.
+The $Y$-dependent factors of $G_n$ outside the top integral are $Y^a(1+Y)^{-M/2}e^{-Y/(2n)}\prod_l(Y-y_l)$, and $a+r''-M/2=-\kappa_k-1=-1$.
+The top integral obeys Eq.~\eqref{eq:top} with $F^{(k)}$ and is at most $n^eJ$.
+
+Step 1 (bottom cost).
+Let $\mu(Y,s)=Z^{-1}\int g^{(k+1)}(y_{\rm bot})h^{(k)}_s(Y,y_{\rm bot})\,dy_{\rm bot}$.
+We show $\mu(Y,s)\le\Phi(s)\min\{1,C_1((1+Y)/(1+s))^{1/2}\}$.
+The bound $\mu\le\Phi$ follows from (M) and Lemma~\ref{lem:stratum}.
+With $w=O^\top u$ uniform on $S^{N-1}$, $h^{(k)}_s=\E_w\exp\{-s[w_{k+1}^2/(1+Y)+\mathcal C\,\hat Y]\}$, where $\mathcal C=\sum_{i>k+1}w_i^2$ and $\hat Y\in[0,1]$ depends on $y_{\rm bot}$ and on the direction of $(w_i)_{i>k+1}$ only.
+The triple $(\sum_{i\le k}w_i^2,w_{k+1}^2,\mathcal C)$ is Dirichlet$(\tfrac k2,\tfrac12,\tfrac{N-k-1}2)$ and independent of that direction.
+By the proof of Lemma~\ref{lem:stratum} at $j=k+1$, $\hat Y$ averaged over $y_{\rm bot}$ has the law of $\tau_V^{(k+1)}\sim\mathrm{Beta}(\tfrac{N-k}2,\tfrac{H-k-1}2)$ (tie condition used), and $\Phi(s)=\E e^{-s\mathcal C\tau_V^{(k+1)}}$ with $\mathcal C\sim\mathrm{Beta}(\tfrac{N-k-1}2,\tfrac{k+1}2)$.
+On $\{\mathcal C\le\tfrac12\}$, given $\mathcal C$, $w_{k+1}^2=(1-\mathcal C)\beta$ with $\beta\sim\mathrm{Beta}(\tfrac12,\tfrac k2)$ independent, and $\E e^{-s\beta/(2(1+Y))}\le c\min\{1,((1+Y)/s)^{1/2}\}$.
+On $\{\mathcal C>\tfrac12\}$ the integrand is at most $e^{-s\hat Y/2}$, whose average is $O((1+s)^{-(N-k)/2})$, while $\Phi(s)\ge\E e^{-s\mathcal C}\ge c(1+s)^{-(N-k-1)/2}$ (Lemma~\ref{lem:beta}).
+The ratio is $O((1+s)^{-1/2})$.
+Degenerate factors ($k=0$, $k+1=H$, or $k+1=N$) only strengthen these bounds.
+
+Step 2 (upper bounds).
+By (M), $h_s\le h^{(k)}_s(Y,y_{\rm bot})$.
+Bounding the top integral by $n^eJ$, $\prod_l(Y-y_l)\le Y^{r''}$, $e^{-\lvert y_{\rm bot}\rvert/(2n)}\le1$ and dropping $y_{{\rm bot},1}\le Y$,
+\begin{equation}
+  \int G_nh_s\le n^eJZ\,\Phi(s)\int_0^\infty Y^{a+r''}(1+Y)^{-M/2}e^{-Y/(2n)}\min\Big\{1,C_1\Big(\frac{1+Y}{1+s}\Big)^{1/2}\Big\}dY .
+\end{equation}
+Since $Y^{a+r''}(1+Y)^{-M/2}\le Y^{-1}$ for $Y\ge1$ and $a\ge-\tfrac12$, the integral over $Y\le1$ is at most $2$, over $1\le Y\le1+s$ at most $2\sqrt2\,C_1$, and over $Y\ge1+s$ at most $E_1(\tfrac{1+s}{2n})\le\ell+\log3$, with $E_1$ the exponential integral.
+The case $s=0$ bounds $\int G_n$ by $n^eJZ(\log n+C)$.
+
+Step 3 (lower bounds).
+Restrict to $Y\in[K(1+s),n/K]$, $y_k\ge(nY)^{1/2}$, $y_{{\rm bot},1}\le((1+s)Y)^{1/2}$, with $K$ a large constant.
+By (M), $h_s\ge e^{-s/(1+y_k)-s/(1+Y)}h^{(k+1)}_s(y_{\rm bot})$, and $s/(1+y_k)+s/(1+Y)\le2((1+s)/Y)^{1/2}$.
+In the top integral, $z_k\ge(Y/n)^{1/2}$ gives $\rho_n\ge1-c(Y/n)^{1/2}-cY^{-1/2}$ and $J_{(Y/n)^{1/2}}\ge J(1-c(Y/n)^{1/2})$.
+The $Y$-factors are at least $Y^{-1}(1-c/Y)(1-Y/n)(1-((1+s)/Y)^{1/2})^{r''}$, and $e^{-\lvert y_{\rm bot}\rvert/(2n)}\ge1-r''Y/n$.
+The bottom integral is $Z[\Phi(s)-T^{(k+1)}(((1+s)Y)^{1/2},s)]\ge Z\Phi(s)[1-c((1+s)/Y)^{1/2}]$ by Eqs.~\eqref{eq:tail}--\eqref{eq:compare} with $\kappa_{k+1}=1$.
+All relative errors are $O(((1+s)/Y)^{1/2}+(Y/n)^{1/2})$, whose integral against $dY/Y$ over $[K(1+s),n/K]$ is bounded.
+Hence $\int G_nh_s\ge n^eJZ\,\Phi(s)(\ell-C)$, and at $s=0$, $\int G_n\ge n^eJZ(\log n-C)$.
+Steps 2 and 3 give Eq.~\eqref{eq:tie}.
+\end{proof}
+
+At $s=n^\theta$, Eq.~\eqref{eq:tie} gives $\log R_n-\log\Phi\to\log(1-\theta)$.
+For $N=M=3$, $H=1$, $s=n^{1/2}$ the difference $D=\log R_n-\log\Phi$ is $-0.7171,-0.7049,-0.6990,-0.6960,-0.6946$ at $n=10^{8},10^{16},10^{32},10^{64},10^{128}$, against $\log\tfrac12=-0.6931$, with $D-\log(\ell/\log n)$ halving as $\log n$ doubles (checked numerically, \texttt{b9\_checks.py h1}).
+At $s=2$ the same difference is $-0.0313,\dots,-0.0019$, i.e.\ $O(1/\log n)$.
+For $(N,H,M)=(2,2,3)$, $D-\log(\ell/\log n)$ is $+0.023,+0.013,-0.021$ at $n=10^{12}$, $s=n^{1/4},n^{1/2},n^{3/4}$, and $+0.014,+0.012$ at $n=10^{20}$, $s=n^{1/4},n^{1/2}$ (checked numerically with \texttt{rrr.py}).
+
+\section{What is not proved}
+
+\begin{enumerate}
+\item Multi-scale form (heuristic). Theorem~\ref{thm:main} holds for every rank of $C$, so for $m=1$ the multi-scale statement of the outline (separate factors $\Psi_i(n\delta_i^2)$ for $\delta_1\gg\delta_2\gg\dots$) is equivalent to the factorisation of the $n$-independent function $\Phi_{j_*}(S)$ for widely separated eigenvalues of $S$. That factorisation is not proved here. A route is to apply Lemma~\ref{lem:rep} and the sandwich Eq.~\eqref{eq:sandwich} to $\Phi_{j_*}$ itself after conditioning on the frame that captures the largest eigendirection; we have not carried it out.
+\item Two dominant strata with rank $\ge2$ (not done). Theorem~\ref{thm:tie} uses rank one in Step~1, through the Dirichlet structure of a single vector $w$. For rank $\ge2$ the scale that replaces $1+s$ in $\ell$ is not determined; with separated eigenvalues it may lie between the smallest and largest eigenvalue.
+\item Explicit form of the fixed-$\delta$ correction for general $(N,H,M)$ (not done). Remark~\ref{rem:fixed} computes it for $(2,1,1)$ only.
+\item Non-Gaussian priors (not done). Lemma~\ref{lem:rep} uses the $O(N)$-invariance of the prior of $A$ and the Gaussian form of both priors.
+\end{enumerate}
+
+\begin{thebibliography}{9}
+\bibitem{AW05} M.~Aoyagi and S.~Watanabe, Stochastic complexities of reduced rank regression in Bayesian estimation, Neural Networks \textbf{18}, 924 (2005).
+\bibitem{Mui82} R.~J.~Muirhead, \emph{Aspects of Multivariate Statistical Theory} (Wiley, New York, 1982).
+\bibitem{Wat09} S.~Watanabe, \emph{Algebraic Geometry and Statistical Learning Theory} (Cambridge University Press, Cambridge, 2009).
+\end{thebibliography}
+
+\end{document}
