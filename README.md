@@ -4,7 +4,7 @@
 
 When does a Bayesian model begin to resolve a weak feature, and what does a learning-coefficient measurement tell us about that change? I study this in reduced-rank regression, where one layer can be integrated out exactly.
 
-**[Two-page research brief](research_brief.pdf)** · **[Proofs](proofs/proof_B9.pdf)**
+**[Notes (PDF)](notes.pdf)** · **[Proofs](proofs/proof_B9.pdf)**
 
 ## Main result
 
@@ -31,7 +31,8 @@ The script checks the exact evaluator against an independent integral (agreement
 
 | File | Contents |
 |---|---|
-| `research_brief.tex` / `.pdf` | Question, results, limitations and next experiment |
+| `notes.tex` / `.pdf` | The calculations, results, figures and open questions |
+| `figures/` | Figures used in the notes |
 | `proofs/proof_B9.tex` / `.pdf` | Uniform bound (unique stratum) and tie correction |
 | `code/rrr.py` | Exact radial evaluator for the reduced-rank evidence |
 | `code/a3_rrr_order.py` | Posterior-mass window calculations |
